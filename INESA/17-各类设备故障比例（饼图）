@@ -1,0 +1,22 @@
+SELECT asset_class_code
+     , downtime
+     , round(downtime / total_downtime * 100, 2) AS 停机百分比
+  FROM
+    (SELECT asset_class_code
+          , round(sum(wo_downtime) / 60, 2) AS downtime
+       FROM wo_history
+              INNER JOIN asset_location ON wo_history.location_code = asset_location.location_code
+       WHERE wo_type_type = 'CORR'
+         AND wo_failure_time BETWEEN :start_date AND :end_date
+       GROUP BY asset_class_code
+       ORDER BY round(sum(wo_downtime) / 60, 2) DESC
+    ) AS down_data
+      NATURAL JOIN
+        (SELECT @running_total := 0
+        ) running_total,
+    /* Total downtime.*/
+    (SELECT round(sum(wo_downtime) / 60, 2) AS total_downtime
+       FROM wo_history
+       WHERE wo_type_type = 'CORR'
+         AND wo_failure_time BETWEEN :start_date AND :end_date
+    ) AS total_downtime_data

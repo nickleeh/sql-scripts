@@ -1,0 +1,12 @@
+SELECT asset_list.asset_code
+     , asset_list.asset_name
+     , asset_list.asset_nature
+     , asset_list_2.asset_code AS position
+     , asset_category_code
+     , asset_class_code
+FROM asset_list
+       INNER JOIN asset_list asset_list_2 ON asset_list.in_functional_location_id = asset_list_2.asset_id
+       INNER JOIN mic_asset_category ON asset_list.asset_category_id = mic_asset_category.asset_category_id
+       INNER JOIN mic_asset_class ON asset_list.asset_class_id = mic_asset_class.asset_class_id
+WHERE asset_list.asset_nature = 2
+ORDER BY asset_list.asset_code
